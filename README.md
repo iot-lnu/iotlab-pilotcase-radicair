@@ -80,8 +80,29 @@ A small [python script](/main-view.py) is also included to demonstrate how to fe
 Using a patented radon detection technology, the EcoQube delivers industry leading radon counting sensitivity of 30 counts per hour per pCi/L.
 It uses Bluetooth for establishing the initial pairing, after that WiFi is used to send the measurements to the Ecosense server using an API. 
 API is not open for consumer use, but there is a B2B offering. 
-The Amazon auth service is used to authenticate all the requests and token is obtained using <a href="[https://wiki.mozilla.org/Identity/AttachedServices/KeyServerProtocol#Login:_Obtaining_the_authToken](https://wiki.mozilla.org/Identity/AttachedServices/KeyServerProtocol#Login:_Obtaining_the_authToken)"Key Server Protocol</a>, which makes it quite difficult to catch the traffic inbetween. 
+The Amazon auth service is used to authenticate all the requests and token is obtained using <a href="https://wiki.mozilla.org/Identity/AttachedServices/KeyServerProtocol#Login:_Obtaining_the_authToken">Key Server Protocol</a>, which makes it quite difficult to catch the traffic inbetween. 
 The data then is displayed in a companion mobile app and can be imported as a csv file. 
 
 <img width="50%" alt="ecosense" src="https://github.com/iot-lnu/iotlab-pilotcase-radicair/assets/664504/8b8d08d6-c971-44f3-8a4f-73a251e237ba5"/><br />
 
+### Accessing the Airthings API
+
+The Airthings API is a RESTful service that lets users access data from Airthings devices, including information such as radon levels, temperature, and humidity. Users with Airthings devices can use the API through the Airthings mobile app or web portal.
+
+For data retrieval, a Python script is available that works with the Radicair Hub. You can find this script [here](/src/airthings_data_getter.py).
+
+This script is set up as a class that can run in a separate thread. It regularly sends GET requests to the Airthings API to gather data. The collected data is then sent to an MQTT broker using the `data_sender` class. The script uses credentials from a file to  authenticate API requests.
+
+### User web interface
+
+The web interface is doing two things. A user friendly way to enter the credentials for the airthings API and a way to set the mode and threshold for the radon.
+
+The web server is a simple app made with flask. It has a form where the user can enter the credentials for the airthings API. The credentials are then stored locally in a file. The user can also set the mode and threshold for the radon. The mode is either temperature or radon. If the mode is temperature the fans will be adjusted according to the temperature. The threshold is for the radon mode. The credentials, mode and threshold are stored to a file and the the mode and threshold are sent to the mqtt server.
+
+### The architecture of the system
+
+Here is a high-level image overview of the architecture of the system:
+
+![Architecture](/architecture.png)
+
+The Airthings device sends data to the Airthings API, which users can access to obtain data from their own devices. The Radicair Hub retrieves this data from the API periodically. Based on the data, the hub adjusts the fan speeds according to the radon levels or temperature, depending on the mode selected by the user. The hub sends the fan speed values via MQTT. Additionally, the data is sent to the Radicair API, allowing users to view it through a web interface.
